@@ -2,12 +2,14 @@ import sys
 import os
 import streamlit as st
 from streamlit_option_menu import option_menu
+from streamlit_elements import elements, mui
+
 from PIL import Image
 import pandas as pd
 
 import requests
 from io import BytesIO
-from dashboard import show_dashboard
+from dashboard import main as display_dashboard
 import plotly.graph_objects as go
 
 # Ensure the working directory is set to the project's root directory
@@ -171,6 +173,66 @@ def generate_report_ui():
 def main():
     st.set_page_config(page_title="AllRights - User Dashboard", layout="wide")
 
+    # Include the Streamlit theme configuration
+    st.markdown(
+        """
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
+        """,
+        unsafe_allow_html=True
+    )
+
+    # Include Bootstrap Icons
+    st.markdown(
+        """
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.7.2/font/bootstrap-icons.min.css" rel="stylesheet">
+        """,
+        unsafe_allow_html=True
+    )
+    # Display the navigation bar with Bootstrap classes and icons
+    st.markdown(
+    """
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <a class="navbar-brand d-none d-sm-block" href="allrights.media">
+                <img src="https://framerusercontent.com/images/Q0F7EjmUHYVDNXaxQotkvneL1PQ.png?scale-down-to=512" width="60" height="60" class="d-inline-block align-top" alt="">
+            </a>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <form class="d-flex">
+                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                    <button class="btn" type="submit" style="border-color: #0A1F44; color: #0A1F44;">Search</button>
+                </form>
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="bi bi-bell fs-4"></i> <!-- Bootstrap Icon with larger size -->
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="bi bi-envelope fs-4"></i> <!-- Bootstrap Icon with larger size -->
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <img class="avatar avatar-lg" src="https://i.pinimg.com/736x/b0/91/4d/b0914dbef0e019e7a4832795ee9f08c3.jpg" alt="Taylor Swift" style="height: 40px; width: 40px; border-radius: 60%;">
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="bi bi-three-dots-vertical fs-4"></i> <!-- Bootstrap Icon with larger size -->
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    """,
+    unsafe_allow_html=True
+    )
+
     with st.sidebar:
         selected = option_menu(
             menu_title="AllRights",
@@ -182,7 +244,8 @@ def main():
 
     if selected == "Dashboard":
         st.title("Dashboard")
-        show_dashboard()
+
+        display_dashboard()
 
     elif selected == "Submit Content":
         content_submission()
