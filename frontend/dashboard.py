@@ -228,12 +228,6 @@ def overview_tab():
         ui.table(data=claims_df, maxHeight=300)          
         
 
-# Display the "Analytics" tab
-def analytics_tab():
-    st.title("Analytics")
-    # Add the analytics UI code 
-    st.write("This is the Analytics tab.")
-
 # Display the "Reports" tab
 def reports_tab():
     st.title("Reports")
@@ -244,13 +238,11 @@ def reports_tab():
 # Run the app
 def main():
     
-    main_tabs = ["Overview", "Analytics", "Reports"]
+    main_tabs = ["Overview", "Reports"]
     tab_selection = ui.tabs(options=main_tabs, default_value='Overview', key="main_tabs")
     
     if tab_selection == "Overview":
         overview_tab()
-    elif tab_selection == "Analytics":
-        analytics_tab()
     elif tab_selection == "Reports":
         reports_tab()
 
