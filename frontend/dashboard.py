@@ -222,28 +222,28 @@ def overview_tab():
     
     with col_table:
     
-        # Creating a DataFrame
-        claims_df = pd.DataFrame(mock_data)
-
-        ui.table(data=claims_df, maxHeight=300)          
+        pass          
         
 
 # Display the "Reports" tab
 def reports_tab():
     st.title("Reports")
     # Add the reports UI code here
-    st.write("This is the Reports tab.")
+    # Creating a DataFrame
+    claims_df = pd.DataFrame(mock_data)
+
+    ui.table(data=claims_df, maxHeight=300)
 
 
 # Run the app
 def main():
     
-    main_tabs = ["Overview", "Reports"]
+    main_tabs = ["Overview", "Detailed Reports"]
     tab_selection = ui.tabs(options=main_tabs, default_value='Overview', key="main_tabs")
     
     if tab_selection == "Overview":
         overview_tab()
-    elif tab_selection == "Reports":
+    elif tab_selection == "Detailed Reports":
         reports_tab()
 
 if __name__ == "__main__":
