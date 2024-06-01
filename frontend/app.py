@@ -203,6 +203,11 @@ def main():
         display_dashboard()
 
     elif selected == "Submit Content":
+        from streamlit_simple_gallery import ImageGallery
+        default_gallery = ImageGallery(directory="assets/")
+        gallery_with_columns = ImageGallery(directory="assets/", label="**Gallery - Columns**", number_of_columns=3)
+        expander_gallery = ImageGallery(directory="assets/", expanded=True, gallery_type="expander", label="**Gallery - Expander**")
+        multiple_options_gallery = ImageGallery(directory="assets/", gallery_type="expander", label="**Gallery - Multiple Options**", number_of_columns=3, show_filename=False)
         content_submission()
 
     elif selected == "Scrape Content":

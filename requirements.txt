@@ -101,3 +101,4 @@ uvicorn==0.29.0
 webdriver-manager==4.0.1
 websocket-client==1.8.0
 websockets==11.0.3
+streamlit-simple-gallery==0.0.4
