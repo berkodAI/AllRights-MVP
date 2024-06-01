@@ -189,50 +189,7 @@ def main():
         unsafe_allow_html=True
     )
     # Display the navigation bar with Bootstrap classes and icons
-    st.markdown(
-    """
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <div class="container-fluid">
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <a class="navbar-brand d-none d-sm-block" href="allrights.media">
-                <img src="https://framerusercontent.com/images/Q0F7EjmUHYVDNXaxQotkvneL1PQ.png?scale-down-to=512" width="60" height="60" class="d-inline-block align-top" alt="">
-            </a>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <form class="d-flex">
-                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-                    <button class="btn" type="submit" style="border-color: #0A1F44; color: #0A1F44;">Search</button>
-                </form>
-                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <i class="bi bi-bell fs-4"></i> <!-- Bootstrap Icon with larger size -->
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <i class="bi bi-envelope fs-4"></i> <!-- Bootstrap Icon with larger size -->
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <img class="avatar avatar-lg" src="https://i.pinimg.com/736x/b0/91/4d/b0914dbef0e019e7a4832795ee9f08c3.jpg" alt="Taylor Swift" style="height: 40px; width: 40px; border-radius: 60%;">
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <i class="bi bi-three-dots-vertical fs-4"></i> <!-- Bootstrap Icon with larger size -->
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-    """,
-    unsafe_allow_html=True
-    )
-
+    
     with st.sidebar:
         selected = option_menu(
             menu_title="AllRights",
