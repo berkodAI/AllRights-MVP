@@ -193,15 +193,13 @@ def main():
     with st.sidebar:
         selected = option_menu(
             menu_title="AllRights",
-            options=["Dashboard","Submit Content", "Scrape Content"],
+            options=["Dashboard","Submit Content", "Detected Content"],
             icons=["graph-up","cloud-upload", "search"],
             menu_icon="cast",
             default_index=0,
         )
 
     if selected == "Dashboard":
-        st.title("Dashboard")
-
         display_dashboard()
 
     elif selected == "Submit Content":
