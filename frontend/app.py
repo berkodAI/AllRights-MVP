@@ -236,8 +236,8 @@ def main():
     with st.sidebar:
         selected = option_menu(
             menu_title="AllRights",
-            options=["Dashboard","Submit Content", "Scrape Content", "Generate Report"],
-            icons=["graph-up","cloud-upload", "search", "file-pdf"],
+            options=["Dashboard","Submit Content", "Scrape Content"],
+            icons=["graph-up","cloud-upload", "search"],
             menu_icon="cast",
             default_index=0,
         )
@@ -253,8 +253,6 @@ def main():
     elif selected == "Scrape Content":
         web_scraping()
 
-    elif selected == "Generate Report":
-        generate_report_ui()
 
 if __name__ == '__main__':
     main()
