@@ -240,16 +240,11 @@ def reports_tab():
     # Add the reports UI code here
     st.write("This is the Reports tab.")
 
-# Display the "Notifications" tab
-def notifications_tab():
-    st.title("Notifications")
-    # Add the notifications UI code here
-    st.write("This is the Notifications tab.")
 
 # Run the app
 def main():
     
-    main_tabs = ["Overview", "Analytics", "Reports", "Notifications"]
+    main_tabs = ["Overview", "Analytics", "Reports"]
     tab_selection = ui.tabs(options=main_tabs, default_value='Overview', key="main_tabs")
     
     if tab_selection == "Overview":
@@ -258,8 +253,6 @@ def main():
         analytics_tab()
     elif tab_selection == "Reports":
         reports_tab()
-    elif tab_selection == "Notifications":
-        notifications_tab()
 
 if __name__ == "__main__":
     main()
