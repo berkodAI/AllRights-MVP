@@ -5,6 +5,9 @@ from streamlit_elements import elements, mui, nivo
 from collections import defaultdict
 from datetime import datetime, timedelta
 import random
+import numpy as np
+from datetime import datetime
+import plotly.express as px
 
 # Generate mock data
 def generate_mock_data(start_date, end_date, num_entries):
@@ -27,7 +30,6 @@ mock_data = generate_mock_data("2024-01-01", datetime.now().strftime("%Y-%m-%d")
 
 # Calculate counts of each media type
 media_counts = pd.Series([d['TYPE'] for d in mock_data]).value_counts().to_dict()
-
 total_detected_media = sum(media_counts.values())
 
 # Define the color palette
@@ -42,10 +44,8 @@ pie_data_with_percentage = [
     {"id": "Audio", "label": "Audio", "value": media_counts.get("Audio", 0)},
 ]
 
-
 # Preprocess data to aggregate counts by month and STATUS
 status_counts = defaultdict(lambda: defaultdict(int))
-
 for entry in mock_data:
     month = datetime.strptime(entry["DATE"], "%Y-%m-%d").strftime("%Y-%m")
     status = entry["STATUS"]
@@ -54,7 +54,6 @@ for entry in mock_data:
 # Prepare data for Nivo Line chart
 line_data = []
 statuses = ["Pending", "Removed", "Ready to Claim"]
-
 for status in statuses:
     line_data.append({
         "id": status,
@@ -66,16 +65,34 @@ for status in statuses:
 def overview_tab():
     st.title("Overview")
     # Creating columns
-    col1, col2, col3, col4, col5 = st.columns([2, 1, 1, 1, 2])
+    col1, col2, col3 = st.columns([1, 1, 1])
 
     with col1:
         # Two rows for the first column
-        st.metric("Detected Media Types", "Image", "+20.1% from last month")
+        st.metric("Total Detected", "50k", "+16.1% from last month")
+        st.write("")  # Add some space between cards
+        st.write("")  # Add some space between cards
+        st.write("")  # Add some space between cards
+        st.metric("Deepfakes Detected", "12.3K", "+15.2% from last month")
+        
+        
+        
+
+    with col2:
+        # Two rows for the second column
+        st.metric("Total Content Submitted", "50k", "+16.1% from last month")
+        st.write("")  # Add some space between cards
+        st.write("")  # Add some space between cards
+        st.write("")  # Add some space between cards
+        st.metric("Total Claims Processed", "31.4K", "+14.6% from last month")
+    
+
+    with col3:
         with elements("nivo_pie_chart"):
             with mui.Box(sx={"height": 300}):
                 nivo.Pie(
                     data=pie_data_with_percentage,
-                    margin={"top": 5, "right": 10, "bottom": 30, "left": 30},
+                    margin={"top": 10, "right": 10, "bottom": 30, "left": 10},
                     innerRadius=0.5,
                     padAngle=0.7,
                     cornerRadius=3,
@@ -118,22 +135,6 @@ def overview_tab():
                         }
                     ],
                 )
-    with col2:
-        st.write("")
-
-    with col3:
-        # Two rows for the second column
-        st.metric("Deepfakes Detected", "12.3K", "+15.2% from last month")
-        st.write("")  # Add some space between cards
-        st.write("")  # Add some space between cards
-        st.write("")  # Add some space between cards
-        st.metric("Total Claims Processed", "31.4K", "+14.6% from last month")
-    
-    with col4:
-        st.write("")
-
-    with col5:
-        st.metric("Total Detected", "50k", "+16.1% from last month")
         
     st.subheader("Claims")  
     col_line, col_table = st.columns(2)
@@ -220,17 +221,14 @@ def overview_tab():
 
     
     with col_table:
-    
-        
         # Calculate counts of each status for claimed media
         claimed_status_counts = pd.Series([d['STATUS'] for d in mock_data]).value_counts().to_dict()
-        
+
         # Prepare data for the detailed pie chart
         detailed_pie_data = [
             {"id": status, "label": status, "value": claimed_status_counts.get(status, 0)} 
             for status in statuses
         ]
-        
         
         # Display a detailed pie chart for claimed media
         with elements("detailed_pie_chart"):
@@ -283,7 +281,8 @@ def reports_tab():
     # Creating a DataFrame
     claims_df = pd.DataFrame(mock_data)
 
-    ui.table(data=claims_df, maxHeight=300)
+    st.dataframe(claims_df)
+
 
 
 # Run the app

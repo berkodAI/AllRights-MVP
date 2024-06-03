@@ -171,31 +171,65 @@ def generate_report_ui():
             st.download_button("Download Report", f, file_name="report.pdf")
 
 def main():
-    st.set_page_config(page_title="AllRights - User Dashboard", layout="wide")
+    st.set_page_config(
+    page_title="AllRights - User Dashboard",
+    page_icon="allrightslogo_small.png",
+    layout="wide",
+    initial_sidebar_state="expanded"
+    )
 
-    # Include the Streamlit theme configuration
+    # Custom CSS for modern aesthetics
     st.markdown(
         """
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
+        <style>
+        /* Custom CSS for modern look */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+        }
+        .sidebar .sidebar-content {
+            background-color: #343a40;
+            color: white;
+        }
+        .sidebar .sidebar-content .option-menu {
+            margin-top: 20px;
+        }
+        .header, .footer {
+            background-color: #343a40;
+            color: white;
+            text-align: center;
+            padding: 10px;
+        }
+        .footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+
+        }
+        .header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+        .content {
+            margin-top: 60px;
+            margin-bottom: 40px;
+        }
+        </style>
         """,
         unsafe_allow_html=True
     )
+    # Main content wrapper for spacing
+    st.markdown("<div class='main-content'>", unsafe_allow_html=True)
 
-    # Include Bootstrap Icons
-    st.markdown(
-        """
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.7.2/font/bootstrap-icons.min.css" rel="stylesheet">
-        """,
-        unsafe_allow_html=True
-    )
-    # Display the navigation bar with Bootstrap classes and icons
-    
+    st.sidebar.markdown("## User Profile")
     with st.sidebar:
         selected = option_menu(
-            menu_title="AllRights",
+            menu_title="Welcome, Taylor!",
             options=["Dashboard","Submit Content", "Detected Content"],
             icons=["graph-up","cloud-upload", "search"],
-            menu_icon="cast",
+            menu_icon="person-bounding-box",
             default_index=0,
         )
 
@@ -210,7 +244,7 @@ def main():
         multiple_options_gallery = ImageGallery(directory="assets/", gallery_type="expander", label="**Gallery - Multiple Options**", number_of_columns=3, show_filename=False)
         content_submission()
 
-    elif selected == "Scrape Content":
+    elif selected == "Detected Content":
         web_scraping()
 
 
