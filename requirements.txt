@@ -57,6 +57,8 @@ streamlit-option-menu==0.3.12
 streamlit-shadcn-ui==0.1.18
 streamlit-toggle-switch==1.0.2
 streamlit-vertical-slider==2.5.5
+streamlit-simple-gallery==0.0.4
+streamlit-uploads-library==0.1.4
 toml==0.10.2
 toolz==0.12.1
 torch==2.2.2
@@ -67,4 +69,3 @@ typer==0.12.3
 typing_extensions==4.11.0
 webdriver-manager==4.0.1
 websockets==11.0.3
-streamlit-simple-gallery==0.0.4
