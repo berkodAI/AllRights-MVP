@@ -2,7 +2,6 @@ import sys
 import os
 import streamlit as st
 from streamlit_option_menu import option_menu
-from streamlit_elements import elements, mui
 
 from PIL import Image
 import pandas as pd
@@ -10,7 +9,7 @@ import pandas as pd
 import requests
 from io import BytesIO
 from dashboard import main as display_dashboard
-import plotly.graph_objects as go
+from streamlit_uploads_library.library import Library
 
 # Ensure the working directory is set to the project's root directory
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -224,6 +223,7 @@ def main():
     st.markdown("<div class='main-content'>", unsafe_allow_html=True)
 
     st.sidebar.markdown("## User Profile")
+    st.sidebar.write("Welcome, Taylor!")
     with st.sidebar:
         selected = option_menu(
             menu_title="Welcome, Taylor!",
@@ -237,11 +237,8 @@ def main():
         display_dashboard()
 
     elif selected == "Submit Content":
-        from streamlit_simple_gallery import ImageGallery
-        default_gallery = ImageGallery(directory="assets/")
-        gallery_with_columns = ImageGallery(directory="assets/", label="**Gallery - Columns**", number_of_columns=3)
-        expander_gallery = ImageGallery(directory="assets/", expanded=True, gallery_type="expander", label="**Gallery - Expander**")
-        multiple_options_gallery = ImageGallery(directory="assets/", gallery_type="expander", label="**Gallery - Multiple Options**", number_of_columns=3, show_filename=False)
+
+        library = Library(directory="../uploaded/taylor/")
         content_submission()
 
     elif selected == "Detected Content":
