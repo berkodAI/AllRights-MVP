@@ -104,10 +104,11 @@ def web_scraping():
                     
                     response = requests.get(image_url)
                     image = Image.open(BytesIO(response.content))
+                    resized_image = image.resize([250, 300])
                     
                     col = cols[i % len(cols)]
                     with col:
-                        st.image(image, caption=result['title'], use_column_width=True)
+                        st.image(resized_image, caption=result['title'], use_column_width=True)
                         st.write(f"[Link]({result['link']})")
                 except Exception as e:
                     st.error(f"Error displaying image: {e}")
