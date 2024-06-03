@@ -28,12 +28,20 @@ mock_data = generate_mock_data("2024-01-01", datetime.now().strftime("%Y-%m-%d")
 # Calculate counts of each media type
 media_counts = pd.Series([d['TYPE'] for d in mock_data]).value_counts().to_dict()
 
-# Prepare data for pie chart
-pie_data = [
-    {"id": "Image", "label": "Image", "value": media_counts.get("Image", 0), "color": "hsl(309, 70%, 50%)"},
-    {"id": "Video", "label": "Video", "value": media_counts.get("Video", 0), "color": "hsl(229, 70%, 50%)"},
-    {"id": "Audio", "label": "Audio", "value": media_counts.get("Audio", 0), "color": "hsl(78, 70%, 50%)"},
+total_detected_media = sum(media_counts.values())
+
+# Define the color palette
+primary_color = "#0A1F44"
+secondary1_color = "#B0B0B0"
+secondary2_color = "#5A8CCB"
+
+# Prepare data for pie chart with percentages
+pie_data_with_percentage = [
+    {"id": "Image", "label": "Image", "value": media_counts.get("Image", 0)},
+    {"id": "Video", "label": "Video", "value": media_counts.get("Video", 0)},
+    {"id": "Audio", "label": "Audio", "value": media_counts.get("Audio", 0)},
 ]
+
 
 # Preprocess data to aggregate counts by month and STATUS
 status_counts = defaultdict(lambda: defaultdict(int))
@@ -58,69 +66,43 @@ for status in statuses:
 def overview_tab():
     st.title("Overview")
     # Creating columns
-    col1, col2, col3 = st.columns([1, 1, 2])
+    col1, col2, col3, col4, col5 = st.columns([2, 1, 1, 1, 2])
 
     with col1:
         # Two rows for the first column
-        st.metric("Detected Media", "531.891K", "+20.1% from last month")
-        st.write("")  # Add some space between cards
-        st.metric("Deepfakes Detected", "12.3K", "+15.2% from last month")
-
-    with col2:
-        # Two rows for the second column
-        st.metric("Total Detected", "250k", "+16.1% from last month")
-        st.write("")  # Add some space between cards
-        st.metric("Total Claimed", "31.4K", "+14.6% from last month")
-
-    with col3:
+        st.metric("Detected Media Types", "Image", "+20.1% from last month")
         with elements("nivo_pie_chart"):
             with mui.Box(sx={"height": 300}):
                 nivo.Pie(
-                    data=pie_data,
+                    data=pie_data_with_percentage,
                     margin={"top": 5, "right": 10, "bottom": 30, "left": 30},
                     innerRadius=0.5,
                     padAngle=0.7,
                     cornerRadius=3,
                     activeOuterRadiusOffset=8,
+                    colors={"scheme": "blues"},  # Change color scheme to blues
                     borderWidth=1,
-                    borderColor={"from": "color", "modifiers": [["darker", 0.8]]},
+                    borderColor={"from": "color", "modifiers": [["darker", 0.95]]},
+                    arcLabelsSkipAngle=10,
+                    arcLabelsTextColor={"from": "color", "modifiers": [["darker", 17]]},
+                    arcLabelsRadiusOffset=0.7,  # Adjust label position
+                    arcLabelsColor="black",  # Set label color to background
+                    arcLabelsFormat=".8f%%",  # Format label as percentage
                     arcLinkLabelsSkipAngle=10,
                     arcLinkLabelsTextColor="grey",
                     arcLinkLabelsThickness=2,
-                    arcLinkLabelsColor={"from": "color"},
-                    arcLabelsSkipAngle=10,
-                    arcLabelsTextColor={"from": "color", "modifiers": [["darker", 4]]},
-                    defs=[
-                        {
-                            "id": "dots",
-                            "type": "patternDots",
-                            "background": "inherit",
-                            "color": "rgba(255, 255, 255, 0.3)",
-                            "size": 4,
-                            "padding": 1,
-                            "stagger": True,
-                        },
-                        {
-                            "id": "lines",
-                            "type": "patternLines",
-                            "background": "inherit",
-                            "color": "rgba(255, 255, 255, 0.3)",
-                            "rotation": -45,
-                            "lineWidth": 6,
-                            "spacing": 10,
-                        },
-                    ],
+                    arcLinkLabelsColor="black",
                     fill=[
-                        {"match": {"id": "Image"}, "id": "dots"},
-                        {"match": {"id": "Video"}, "id": "dots"},
-                        {"match": {"id": "Audio"}, "id": "lines"},
+                        {"match": {"id": "Image"}, "id": primary_color},
+                        {"match": {"id": "Video"}, "id": secondary1_color},
+                        {"match": {"id": "Audio"}, "id": secondary2_color},
                     ],
                     legends=[
                         {
-                            "anchor": "left",
+                            "anchor": "right",
                             "direction": "column",
                             "justify": False,
-                            "translateX": 0,
+                            "translateX": 55,
                             "translateY": 36,
                             "itemsSpacing": 4,
                             "itemWidth": 100,
@@ -131,11 +113,28 @@ def overview_tab():
                             "symbolSize": 18,
                             "symbolShape": "circle",
                             "effects": [
-                                {"on": "hover", "style": {"itemTextColor": "#000"}}
+                                {"on": "hover", "style": {"itemTextColor": "#090"}}
                             ],
                         }
                     ],
                 )
+    with col2:
+        st.write("")
+
+    with col3:
+        # Two rows for the second column
+        st.metric("Deepfakes Detected", "12.3K", "+15.2% from last month")
+        st.write("")  # Add some space between cards
+        st.write("")  # Add some space between cards
+        st.write("")  # Add some space between cards
+        st.metric("Total Claims Processed", "31.4K", "+14.6% from last month")
+    
+    with col4:
+        st.write("")
+
+    with col5:
+        st.metric("Total Detected", "50k", "+16.1% from last month")
+        
     st.subheader("Claims")  
     col_line, col_table = st.columns(2)
     
@@ -222,8 +221,60 @@ def overview_tab():
     
     with col_table:
     
-        pass          
         
+        # Calculate counts of each status for claimed media
+        claimed_status_counts = pd.Series([d['STATUS'] for d in mock_data]).value_counts().to_dict()
+        
+        # Prepare data for the detailed pie chart
+        detailed_pie_data = [
+            {"id": status, "label": status, "value": claimed_status_counts.get(status, 0)} 
+            for status in statuses
+        ]
+        
+        
+        # Display a detailed pie chart for claimed media
+        with elements("detailed_pie_chart"):
+            with mui.Box(sx={"height": 300}):
+                nivo.Pie(
+                    data=detailed_pie_data,
+                    margin={"top": 5, "right": 10, "bottom": 30, "left": 30},
+                    innerRadius=0.5,
+                    padAngle=0.7,
+                    cornerRadius=3,
+                    activeOuterRadiusOffset=8,
+                    colors={"scheme": "blues"},  # Change color scheme to blues
+                    borderWidth=1,
+                    borderColor={"from": "color", "modifiers": [["darker", 0.95]]},
+                    arcLabelsSkipAngle=10,
+                    arcLabelsTextColor={"from": "color", "modifiers": [["darker", 17]]},
+                    arcLabelsRadiusOffset=0.7,  # Adjust label position
+                    arcLabelsColor="black",  # Set label color to background
+                    arcLabelsFormat=".8f%%",  # Format label as percentage
+                    arcLinkLabelsSkipAngle=10,
+                    arcLinkLabelsTextColor="grey",
+                    arcLinkLabelsThickness=2,
+                    arcLinkLabelsColor="black",
+                    legends=[
+                        {
+                            "anchor": "right",
+                            "direction": "column",
+                            "justify": False,
+                            "translateX": 35,
+                            "translateY": 36,
+                            "itemsSpacing": 4,
+                            "itemWidth": 100,
+                            "itemHeight": 18,
+                            "itemTextColor": "#999",
+                            "itemDirection": "left-to-right",
+                            "itemOpacity": 1,
+                            "symbolSize": 18,
+                            "symbolShape": "circle",
+                            "effects": [
+                                {"on": "hover", "style": {"itemTextColor": "#000"}}
+                            ],
+                        }
+                    ],
+                )
 
 # Display the "Reports" tab
 def reports_tab():
