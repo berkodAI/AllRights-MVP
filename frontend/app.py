@@ -224,7 +224,6 @@ def main():
     st.markdown("<div class='main-content'>", unsafe_allow_html=True)
 
     st.sidebar.markdown("## User Profile")
-    st.sidebar.write("Welcome, Taylor!")
     with st.sidebar:
         selected = option_menu(
             menu_title="Welcome, Taylor!",
