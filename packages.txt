@@ -1,1 +1,5 @@
-apt-get dependency libgl
+build-essential
+pkg-config
+default-libmysqlclient-dev
+
+apt-get install libgl
