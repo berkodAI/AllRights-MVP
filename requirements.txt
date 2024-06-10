@@ -16,7 +16,7 @@ Markdown==3.6
 matplotlib==3.9.0
 multidict==6.0.5
 numpy==1.26.4
-opencv-python-headles
+opencv-python-headless
 pandas==2.2.2
 pillow==10.2.0
 plotly==5.22.0
