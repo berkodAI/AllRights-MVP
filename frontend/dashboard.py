@@ -29,7 +29,7 @@ def generate_mock_data(start_date, end_date, num_entries):
     return data
 
 # Create mock data from January to the current date
-mock_data = generate_mock_data("2024-01-01", datetime.now().strftime("%Y-%m-%d"), 100)
+mock_data = generate_mock_data("2024-01-01", datetime.now().strftime("%Y-%m-%d"), 11000)
 
 # Calculate counts of each media type
 media_counts = pd.Series([d['TYPE'] for d in mock_data]).value_counts().to_dict()
@@ -68,14 +68,14 @@ def overview_tab():
 
     with col1:
         st.metric("Total Detected Media", total_detected_media, "+16.1% from last month")
-        st.metric("Total Content Submitted", "50k", "+16.1% from last month")
+        st.metric("Total Content Submitted", "8351", "+19.1% from last month")
 
     with col2:
-        st.metric("Deepfakes Detected", "12.3K", "+15.2% from last month")
-        st.metric("Total Claims Processed", "31.4K", "+14.6% from last month")
+        st.metric("Deepfakes Detected", "4231", "+15.2% from last month")
+        st.metric("Total Claims Processed", "10083", "+14.6% from last month")
 
     with col3:
-        st.metric("Detection Accuracy Rate", "97%", "+2% from last month")
+        st.metric("Detection Accuracy Rate", "99%", "+2% from last month")
         st.metric("Average Time to Process Claims", "5 days", "-10% from last month")
 
     st.subheader("Media Type Distribution")
@@ -126,15 +126,16 @@ def overview_tab():
                     }
                 ],
             )
-
     st.subheader("Claim Status Over Time")
-    fig_line = px.line(time_series_data, x='DATE', y='count', color='STATUS', title='Claim Status Over Time')
-    st.plotly_chart(fig_line, use_container_width=True)
+    fig_area = px.area(time_series_data, x='DATE', y='count', color='STATUS', title='Claim Status Over Time')
+    st.plotly_chart(fig_area, use_container_width=True)
+
+    
     
 
 # Detailed Reports Tab
 def detailed_reports_tab():
-
+    
     st.subheader("Claim Status Over Time")
     fig_line = px.line(time_series_data, x='DATE', y='count', color='STATUS', title='Claim Status Over Time')
     st.plotly_chart(fig_line, use_container_width=True)
