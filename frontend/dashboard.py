@@ -10,6 +10,7 @@ import plotly.express as px
 
 import plotly.express as px
 import plotly.graph_objs as go
+import streamlit.components.v1 as components
 
 # Generate mock data
 def generate_mock_data(start_date, end_date, num_entries):
@@ -133,7 +134,6 @@ def overview_tab():
 
 # Detailed Reports Tab
 def detailed_reports_tab():
-    #st.title("Detailed Reports")
 
     st.subheader("Claim Status Over Time")
     fig_line = px.line(time_series_data, x='DATE', y='count', color='STATUS', title='Claim Status Over Time')
@@ -157,7 +157,72 @@ def detailed_reports_tab():
     date_range = st.date_input("Select Date Range", [datetime(2024, 1, 1), datetime.now()])
     start_date, end_date = date_range
     filtered_df = mock_df[(mock_df['DATE'] >= pd.to_datetime(start_date)) & (mock_df['DATE'] <= pd.to_datetime(end_date))]
-    st.dataframe(filtered_df)
+
+    # Generate HTML table with CSS for alignment
+    table_html = """
+    <style>
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    th, td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+    th {
+        background-color: #f2f2f2;
+        font-weight: bold;
+    }
+    tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+    tr:hover {
+        background-color: #ddd;
+    }
+    button {
+        background-color: #0A1F44;
+        color: white;
+        padding: 5px 10px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 15px;
+        margin: 4px 2px;
+        cursor: pointer;
+        border-radius: 8px;
+        border: none;
+    }
+    button_CLAIM {
+        background-color: #C12504;
+        color: white;
+        padding: 5px 10px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 15px;
+        margin: 4px 2px;
+        cursor: pointer;
+        border-radius: 8px;
+        border: none;
+    }
+    </style>
+    <table>
+        <tr>
+            <th>TYPE</th>
+            <th>DATE</th>
+            <th>STATUS</th>
+            <th>FREQUENCY</th>
+        </tr>
+    """
+    for idx, row in filtered_df.iterrows():
+        table_html += generate_row_html(row)
+    table_html += "</table>"
+
+    # Display the HTML table in Streamlit
+    components.html(table_html, height=600, scrolling=True)
+
+    # CSV Download Button
     st.download_button(
         label="Download Data as CSV",
         data=filtered_df.to_csv().encode('utf-8'),
@@ -165,6 +230,20 @@ def detailed_reports_tab():
         mime='text/csv',
     )
 
+# Helper function to generate HTML for each row
+def generate_row_html(row):
+    buttons_html = ""
+    if row["STATUS"] == "Ready to Claim":
+        buttons_html = f"<button_CLAIM onclick='alert(\"Claimed row {row.name + 1}\")'>Claim</button_CLAIM>"
+    else:
+        buttons_html = f"<button onclick='alert(\"Viewing row {row.name + 1}\")'>View</button>"
+
+    row_html = f"<tr>"
+    for col in row.index:
+        row_html += f"<td>{row[col]}</td>"
+    row_html += f"<td>{buttons_html}</td>"
+    row_html += f"</tr>"
+    return row_html
 
 
 # Run the app

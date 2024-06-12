@@ -88,23 +88,6 @@ def content_submission():
             st.error("Please upload a file.")
 
 
-# Function to show the detailed view of an image
-def show_image_details(image_data):
-    st.subheader("Image Details")
-    st.image(image_data['thumbnail'])
-    st.write("Title:", image_data['title'])
-    st.write("URL:", image_data['link'])
-    st.write("Upload Date:", image_data['upload_date'])
-    st.write("Content Type:", image_data['content_type'])
-    st.write("Deepfake Detected:", image_data['Deepfake Detected'])
-    st.write("Confidence:", image_data['Confidence'])
-    st.write("Risk:", image_data['Risk'])
-    st.write("Comment:", image_data['Comment'])
-    if st.button("Back to Results"):
-        st.session_state['selected_image'] = None
-        st.experimental_rerun()
-
-
 def web_scraping():
     st.subheader("Web Scraping")
     search_query = st.text_input("Enter search query (default: Taylor Swift)", "Taylor Swift")
@@ -113,7 +96,24 @@ def web_scraping():
         results = scrape_and_return_image_urls(search_query)
         if results:
             st.success(f"Found {len(results)} results for '{search_query}'")
-
+            
+            cols = st.columns(4)
+            for i, result in enumerate(results):
+                try:
+                    image_url = result['thumbnail']
+                    response = requests.get(image_url)
+                    response.raise_for_status()  # Raise HTTPError for bad responses (4xx and 5xx)
+                    image = Image.open(BytesIO(response.content))
+                    resized_image = image.resize([250, 250])
+                    
+                    col = cols[i % len(cols)]
+                    with col:
+                        st.image(resized_image, use_column_width=True)
+                except requests.exceptions.ConnectionError as e:
+                    st.error(f"Error fetching image for '{result['title']}': {e}")
+                except Exception as e:
+                    st.error(f"Error displaying image for '{result['title']}': {e}")
+            
             # Create DataFrame with additional columns
             df_data = {
                 'title': [],
@@ -123,9 +123,10 @@ def web_scraping():
                 'Deepfake Detected': [],
                 'Confidence': [],
                 'Risk': [],
-                'Comment': []
+                'Comment': [],
+                'Claim': []
             }
-            for result in results:
+            for i, result in enumerate(results):
                 df_data['title'].append(result['title'])
                 df_data['URL'].append(result['link'])
                 df_data['upload_date'].append(result.get('upload_date', 'N/A'))
@@ -143,7 +144,6 @@ def web_scraping():
                         df_data['Risk'].append('High' if is_deepfake else 'Low')
                         df_data['Comment'].append('Suspicious' if is_deepfake else 'Normal')
                     else:
-                        # For videos, we can add a placeholder or handle differently
                         df_data['Deepfake Detected'].append('N/A')
                         df_data['Confidence'].append(0.0)
                         df_data['Risk'].append('N/A')
@@ -154,28 +154,29 @@ def web_scraping():
                     df_data['Confidence'].append(0.0)
                     df_data['Risk'].append('N/A')
                     df_data['Comment'].append('N/A')
-
-            # Save the DataFrame to a session state for later use
+                
+                # Add a Claim button for each row
+                df_data['Claim'].append(f"claim_button_{i}")
+            
             df = pd.DataFrame(df_data)
-            st.session_state['results_df'] = df
+            
+            # Display the DataFrame and add Claim buttons
+            for index, row in df.iterrows():
+                st.write(f"Title: {row['title']}")
+                st.write(f"URL: {row['URL']}")
+                st.write(f"Upload Date: {row['upload_date']}")
+                st.write(f"Content Type: {row['content_type']}")
+                st.write(f"Deepfake Detected: {row['Deepfake Detected']}")
+                st.write(f"Confidence: {row['Confidence']}")
+                st.write(f"Risk: {row['Risk']}")
+                st.write(f"Comment: {row['Comment']}")
+                
+                claim_button = st.button("Claim", key=row['Claim'])
+                if claim_button:
+                    st.success(f"Claimed content: {row['title']}")
 
-            # Display images with clickable links
-            cols = st.columns(4)
-            for i, result in enumerate(results):
-                try:
-                    image_url = result['thumbnail']
-                    response = requests.get(image_url)
-                    image = Image.open(BytesIO(response.content))
-                    resized_image = image.resize([250, 250])
+                st.write("---")  # Separator between rows
 
-                    col = cols[i % len(cols)]
-                    with col:
-                        st.image(resized_image, use_column_width=True)
-                        if st.button(f"Details {i}", key=f"details_{i}"):
-                            st.session_state['selected_image'] = df.loc[i].to_dict()
-                            st.experimental_rerun()  # Trigger rerun to navigate to details page
-                except Exception as e:
-                    st.error(f"Error displaying image: {e}")
         else:
             st.error("No results found.")
 
@@ -263,10 +264,8 @@ def main():
         
 
     elif selected == "Detected Content":
-        if 'selected_image' in st.session_state and st.session_state['selected_image'] is not None:
-            show_image_details(st.session_state['selected_image'])
-        else:
-            web_scraping()
+        
+        web_scraping()
 
 
 if __name__ == '__main__':
