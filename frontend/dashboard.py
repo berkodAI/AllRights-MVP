@@ -129,69 +129,11 @@ def overview_tab():
     st.subheader("Claim Status Over Time")
     fig_line = px.line(time_series_data, x='DATE', y='count', color='STATUS', title='Claim Status Over Time')
     st.plotly_chart(fig_line, use_container_width=True)
-
-    st.subheader("Claim Status Distribution")
-    fig_bar = px.bar(mock_df, x='STATUS', title='Claim Status Distribution', color='STATUS')
-    st.plotly_chart(fig_bar, use_container_width=True)
-    
-    st.subheader("Heatmap of Detections Over Time")
-    heatmap_data = mock_df.groupby(['DATE', 'TYPE']).size().reset_index(name='count')
-    fig_heatmap = px.density_heatmap(heatmap_data, x='DATE', y='TYPE', z='count', title='Heatmap of Detections Over Time')
-    st.plotly_chart(fig_heatmap, use_container_width=True)
     
 
 # Detailed Reports Tab
 def detailed_reports_tab():
-    st.title("Detailed Reports")
-
-    st.subheader("Media Type Distribution")
-    with elements("detailed_pie_chart"):
-        with mui.Box(sx={"height": 300}):
-            nivo.Pie(
-                data=pie_data_with_percentage,
-                margin={"top": 10, "right": 10, "bottom": 30, "left": 10},
-                innerRadius=0.5,
-                padAngle=0.7,
-                cornerRadius=3,
-                activeOuterRadiusOffset=8,
-                colors={"scheme": "blues"},  # Change color scheme to blues
-                borderWidth=1,
-                borderColor={"from": "color", "modifiers": [["darker", 0.95]]},
-                arcLabelsSkipAngle=10,
-                arcLabelsTextColor={"from": "color", "modifiers": [["darker", 17]]},
-                arcLabelsRadiusOffset=0.7,  # Adjust label position
-                arcLabelsColor="black",  # Set label color to background
-                arcLabelsFormat=".8f%%",  # Format label as percentage
-                arcLinkLabelsSkipAngle=10,
-                arcLinkLabelsTextColor="grey",
-                arcLinkLabelsThickness=2,
-                arcLinkLabelsColor="black",
-                fill=[
-                    {"match": {"id": "Image"}, "id": "#0A1F44"},
-                    {"match": {"id": "Video"}, "id": "#B0B0B0"},
-                    {"match": {"id": "Audio"}, "id": "#5A8CCB"},
-                ],
-                legends=[
-                    {
-                        "anchor": "right",
-                        "direction": "column",
-                        "justify": False,
-                        "translateX": 55,
-                        "translateY": 36,
-                        "itemsSpacing": 4,
-                        "itemWidth": 100,
-                        "itemHeight": 18,
-                        "itemTextColor": "#999",
-                        "itemDirection": "left-to-right",
-                        "itemOpacity": 1,
-                        "symbolSize": 18,
-                        "symbolShape": "circle",
-                        "effects": [
-                            {"on": "hover", "style": {"itemTextColor": "#090"}}
-                        ],
-                    }
-                ],
-            )
+    #st.title("Detailed Reports")
 
     st.subheader("Claim Status Over Time")
     fig_line = px.line(time_series_data, x='DATE', y='count', color='STATUS', title='Claim Status Over Time')
@@ -201,77 +143,10 @@ def detailed_reports_tab():
     fig_bar = px.bar(mock_df, x='STATUS', title='Claim Status Distribution', color='STATUS')
     st.plotly_chart(fig_bar, use_container_width=True)
 
-     # Preparing data for Nivo Heatmap
-    heatmap_data_for_nivo = heatmap_data_list.to_dict('records')
-    date_columns = list(heatmap_data_list.columns[1:])
-
     st.subheader("Heatmap of Detections Over Time")
-    with elements("detailed_heatmap"):
-        with mui.Box(sx={"height": 500}):
-            nivo.HeatMap(
-                data=heatmap_data_for_nivo,
-                keys=date_columns,
-                indexBy="TYPE",
-                margin={"top": 60, "right": 90, "bottom": 60, "left": 90},
-                valueFormat=">-.2s",
-                axisTop={
-                    "tickSize": 5,
-                    "tickPadding": 5,
-                    "tickRotation": -90,
-                    "legend": '',
-                    "legendOffset": 46,
-                    "truncateTickAt": 0
-                },
-                axisRight={
-                    "tickSize": 5,
-                    "tickPadding": 5,
-                    "tickRotation": 0,
-                    "legend": 'Media Type',
-                    "legendPosition": 'middle',
-                    "legendOffset": 70,
-                    "truncateTickAt": 0
-                },
-                axisLeft={
-                    "tickSize": 5,
-                    "tickPadding": 5,
-                    "tickRotation": 0,
-                    "legend": 'Media Type',
-                    "legendPosition": 'middle',
-                    "legendOffset": -72,
-                    "truncateTickAt": 0
-                },
-                colors={
-                    "type": 'diverging',
-                    "scheme": 'red_yellow_blue',
-                    "divergeAt": 0.5,
-                    "minValue": -100000,
-                    "maxValue": 100000
-                },
-                emptyColor="#555555",
-                legends=[
-                    {
-                        "anchor": 'bottom',
-                        "translateX": 0,
-                        "translateY": 30,
-                        "length": 400,
-                        "thickness": 8,
-                        "direction": 'row',
-                        "tickPosition": 'after',
-                        "tickSize": 3,
-                        "tickSpacing": 4,
-                        "tickOverlap": False,
-                        "tickFormat": '>-.2s',
-                        "title": 'Value →',
-                        "titleAlign": 'start',
-                        "titleOffset": 4
-                    }
-                ],
-            )
-
-    st.subheader("Trend Analysis")
-    trend_data = mock_df.groupby(['DATE', 'STATUS']).size().reset_index(name='count')
-    fig_trend = px.line(trend_data, x='DATE', y='count', color='STATUS', title='Trend Analysis by Status')
-    st.plotly_chart(fig_trend, use_container_width=True)
+    heatmap_data = mock_df.groupby(['DATE', 'TYPE']).size().reset_index(name='count')
+    fig_heatmap = px.density_heatmap(heatmap_data, x='DATE', y='TYPE', z='count', title='Heatmap of Detections Over Time')
+    st.plotly_chart(fig_heatmap, use_container_width=True)
 
     st.subheader("Correlation Analysis")
     correlation_data = mock_df[['DATE', 'TYPE', 'STATUS', 'count']].copy()

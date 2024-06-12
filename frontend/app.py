@@ -88,6 +88,23 @@ def content_submission():
             st.error("Please upload a file.")
 
 
+# Function to show the detailed view of an image
+def show_image_details(image_data):
+    st.subheader("Image Details")
+    st.image(image_data['thumbnail'])
+    st.write("Title:", image_data['title'])
+    st.write("URL:", image_data['link'])
+    st.write("Upload Date:", image_data['upload_date'])
+    st.write("Content Type:", image_data['content_type'])
+    st.write("Deepfake Detected:", image_data['Deepfake Detected'])
+    st.write("Confidence:", image_data['Confidence'])
+    st.write("Risk:", image_data['Risk'])
+    st.write("Comment:", image_data['Comment'])
+    if st.button("Back to Results"):
+        st.session_state['selected_image'] = None
+        st.experimental_rerun()
+
+
 def web_scraping():
     st.subheader("Web Scraping")
     search_query = st.text_input("Enter search query (default: Taylor Swift)", "Taylor Swift")
@@ -96,37 +113,21 @@ def web_scraping():
         results = scrape_and_return_image_urls(search_query)
         if results:
             st.success(f"Found {len(results)} results for '{search_query}'")
-            
-            cols = st.columns(4)
-            for i, result in enumerate(results):
-                try:
-                    image_url = result['thumbnail']
-                    
-                    response = requests.get(image_url)
-                    image = Image.open(BytesIO(response.content))
-                    resized_image = image.resize([250, 300])
-                    
-                    col = cols[i % len(cols)]
-                    with col:
-                        st.image(resized_image, caption=result['title'], use_column_width=True)
-                        st.write(f"[Link]({result['link']})")
-                except Exception as e:
-                    st.error(f"Error displaying image: {e}")
-            
+
             # Create DataFrame with additional columns
             df_data = {
                 'title': [],
-                'link': [],
+                'URL': [],
                 'upload_date': [],
                 'content_type': [],  
-                'Deepfake': [],
+                'Deepfake Detected': [],
                 'Confidence': [],
                 'Risk': [],
                 'Comment': []
             }
             for result in results:
                 df_data['title'].append(result['title'])
-                df_data['link'].append(result['link'])
+                df_data['URL'].append(result['link'])
                 df_data['upload_date'].append(result.get('upload_date', 'N/A'))
                 content_type = 'Image' if result['thumbnail'].endswith(('jpg', 'jpeg', 'png')) else 'Video' if result['thumbnail'].endswith(('mp4', 'avi', 'mov')) else 'Image & Video'
                 df_data['content_type'].append(content_type)
@@ -137,25 +138,44 @@ def web_scraping():
                         input_image = Image.open(BytesIO(requests.get(result['thumbnail']).content))
                         confidences, _ = predict(input_image)
                         is_deepfake = confidences['fake'] > 0.5
-                        df_data['Deepfake'].append('Yes' if is_deepfake else 'No')
+                        df_data['Deepfake Detected'].append('Yes' if is_deepfake else 'No')
                         df_data['Confidence'].append(confidences['fake'] if is_deepfake else confidences['real'])
                         df_data['Risk'].append('High' if is_deepfake else 'Low')
                         df_data['Comment'].append('Suspicious' if is_deepfake else 'Normal')
                     else:
-                        # For videos, you can add a placeholder or handle differently
-                        df_data['Deepfake'].append('N/A')
+                        # For videos, we can add a placeholder or handle differently
+                        df_data['Deepfake Detected'].append('N/A')
                         df_data['Confidence'].append(0.0)
                         df_data['Risk'].append('N/A')
                         df_data['Comment'].append('N/A')
                 except Exception as e:
                     st.info(f"No face detected for '{result['title']}'")
-                    df_data['Deepfake'].append('N/A')
+                    df_data['Deepfake Detected'].append('N/A')
                     df_data['Confidence'].append(0.0)
                     df_data['Risk'].append('N/A')
                     df_data['Comment'].append('N/A')
-            
+
+            # Save the DataFrame to a session state for later use
             df = pd.DataFrame(df_data)
-            st.dataframe(df, width=2500)  # Adjust width here
+            st.session_state['results_df'] = df
+
+            # Display images with clickable links
+            cols = st.columns(4)
+            for i, result in enumerate(results):
+                try:
+                    image_url = result['thumbnail']
+                    response = requests.get(image_url)
+                    image = Image.open(BytesIO(response.content))
+                    resized_image = image.resize([250, 250])
+
+                    col = cols[i % len(cols)]
+                    with col:
+                        st.image(resized_image, use_column_width=True)
+                        if st.button(f"Details {i}", key=f"details_{i}"):
+                            st.session_state['selected_image'] = df.loc[i].to_dict()
+                            st.experimental_rerun()  # Trigger rerun to navigate to details page
+                except Exception as e:
+                    st.error(f"Error displaying image: {e}")
         else:
             st.error("No results found.")
 
@@ -237,12 +257,16 @@ def main():
         display_dashboard()
 
     elif selected == "Submit Content":
-
-        library = Library(directory="../uploaded/taylor/")
         content_submission()
+        st.text("") # leave a space
+        library = Library(directory="../uploaded/taylor/")
+        
 
     elif selected == "Detected Content":
-        web_scraping()
+        if 'selected_image' in st.session_state and st.session_state['selected_image'] is not None:
+            show_image_details(st.session_state['selected_image'])
+        else:
+            web_scraping()
 
 
 if __name__ == '__main__':
