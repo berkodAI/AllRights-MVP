@@ -2,6 +2,7 @@ beautifulsoup4==4.12.3
 extra-streamlit-components==0.1.71
 facenet-pytorch==2.6.0
 fastapi==0.111.0
+fpdf
 favicon==0.7.0
 ffmpy==0.3.2
 fonttools==4.51.00
