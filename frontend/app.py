@@ -90,96 +90,117 @@ def content_submission():
 
 def web_scraping():
     st.subheader("Web Scraping")
-    search_query = st.text_input("Enter search query (default: Taylor Swift)", "Taylor Swift")
+    
+    # Initialize session state variables
+    if 'search_query' not in st.session_state:
+        st.session_state.search_query = "Taylor Swift"
+    if 'results' not in st.session_state:
+        st.session_state.results = None
+    if 'claimed' not in st.session_state:
+        st.session_state.claimed = []
+
+    search_query = st.text_input("Enter search query (default: Taylor Swift)", st.session_state.search_query)
 
     if st.button("Scrape"):
-        results = scrape_and_return_image_urls(search_query)
-        if results:
-            st.success(f"Found {len(results)} results for '{search_query}'")
-            
-            cols = st.columns(4)
-            for i, result in enumerate(results):
-                try:
-                    image_url = result['thumbnail']
-                    response = requests.get(image_url)
-                    response.raise_for_status()  # Raise HTTPError for bad responses (4xx and 5xx)
-                    image = Image.open(BytesIO(response.content))
-                    resized_image = image.resize([250, 250])
-                    
-                    col = cols[i % len(cols)]
-                    with col:
-                        st.image(resized_image, use_column_width=True)
-                except requests.exceptions.ConnectionError as e:
-                    st.error(f"Error fetching image for '{result['title']}': {e}")
-                except Exception as e:
-                    st.error(f"Error displaying image for '{result['title']}': {e}")
-            
-            # Create DataFrame with additional columns
-            df_data = {
-                'title': [],
-                'URL': [],
-                'upload_date': [],
-                'content_type': [],  
-                'Deepfake Detected': [],
-                'Confidence': [],
-                'Risk': [],
-                'Comment': [],
-                'Claim': []
-            }
-            for i, result in enumerate(results):
+        st.session_state.search_query = search_query
+        st.session_state.results = scrape_and_return_image_urls(search_query)
+        st.session_state.claimed = [False] * len(st.session_state.results)
+
+    if st.session_state.results is not None:
+        st.success(f"Found {len(st.session_state.results)} results for '{st.session_state.search_query}'")
+        
+        # Initialize DataFrame data
+        df_data = {
+            'title': [],
+            'URL': [],
+            'upload_date': [],
+            'content_type': [],  
+            'Deepfake Detected': [],
+            'Confidence': [],
+            'Risk': [],
+            'Comment': [],
+            'Claim': []
+        }
+
+        cols = st.columns(2)
+        for i, result in enumerate(st.session_state.results):
+            try:
+                image_url = result['thumbnail']
+                response = requests.get(image_url)
+                response.raise_for_status()  # Raise HTTPError for bad responses
+                image = Image.open(BytesIO(response.content))
+                resized_image = image.resize([250, 250])
+                
+                # Determine content type
+                content_type = 'Image' if image_url.endswith(('jpg', 'jpeg', 'png')) else 'Video' if image_url.endswith(('mp4', 'avi', 'mov')) else 'Image & Video'
+                
+                # Deepfake detection placeholder
+                is_deepfake, confidence, risk, comment = analyze_deepfake(image, content_type)
+                
                 df_data['title'].append(result['title'])
                 df_data['URL'].append(result['link'])
                 df_data['upload_date'].append(result.get('upload_date', 'N/A'))
-                content_type = 'Image' if result['thumbnail'].endswith(('jpg', 'jpeg', 'png')) else 'Video' if result['thumbnail'].endswith(('mp4', 'avi', 'mov')) else 'Image & Video'
                 df_data['content_type'].append(content_type)
-                
-                # Analyze for deepfake detection
-                try:
-                    if content_type == 'Image':
-                        input_image = Image.open(BytesIO(requests.get(result['thumbnail']).content))
-                        confidences, _ = predict(input_image)
-                        is_deepfake = confidences['fake'] > 0.5
-                        df_data['Deepfake Detected'].append('Yes' if is_deepfake else 'No')
-                        df_data['Confidence'].append(confidences['fake'] if is_deepfake else confidences['real'])
-                        df_data['Risk'].append('High' if is_deepfake else 'Low')
-                        df_data['Comment'].append('Suspicious' if is_deepfake else 'Normal')
-                    else:
-                        df_data['Deepfake Detected'].append('N/A')
-                        df_data['Confidence'].append(0.0)
-                        df_data['Risk'].append('N/A')
-                        df_data['Comment'].append('N/A')
-                except Exception as e:
-                    st.info(f"No face detected for '{result['title']}'")
-                    df_data['Deepfake Detected'].append('N/A')
-                    df_data['Confidence'].append(0.0)
-                    df_data['Risk'].append('N/A')
-                    df_data['Comment'].append('N/A')
-                
-                # Add a Claim button for each row
+                df_data['Deepfake Detected'].append(is_deepfake)
+                df_data['Confidence'].append(confidence)
+                df_data['Risk'].append(risk)
+                df_data['Comment'].append(comment)
                 df_data['Claim'].append(f"claim_button_{i}")
-            
-            df = pd.DataFrame(df_data)
-            
-            # Display the DataFrame and add Claim buttons
-            for index, row in df.iterrows():
-                st.write(f"Title: {row['title']}")
-                st.write(f"URL: {row['URL']}")
-                st.write(f"Upload Date: {row['upload_date']}")
-                st.write(f"Content Type: {row['content_type']}")
-                st.write(f"Deepfake Detected: {row['Deepfake Detected']}")
-                st.write(f"Confidence: {row['Confidence']}")
-                st.write(f"Risk: {row['Risk']}")
-                st.write(f"Comment: {row['Comment']}")
-                
-                claim_button = st.button("Claim", key=row['Claim'])
-                if claim_button:
-                    st.success(f"Claimed content: {row['title']}")
 
-                st.write("---")  # Separator between rows
+                col = cols[i % 2]
+                with col:
+                    st.image(resized_image, use_column_width=True)
+                    st.write(f"**Title:** {result['title']}")
+                    st.write(f"**URL:** {result['link']}")
+                    st.write(f"**Upload Date:** {result.get('upload_date', 'N/A')}")
+                    st.write(f"**Content Type:** {content_type}")
+                    st.write(f"**Deepfake Detected:** {is_deepfake}")
+                    st.write(f"**Confidence:** {confidence}")
+                    st.write(f"**Risk:** {risk}")
+                    st.write(f"**Comment:** {comment}")
 
-        else:
-            st.error("No results found.")
+                    if st.session_state.claimed[i]:
+                        view_button = st.button("View", key=f"view_button_{i}")
+                        st.success(f"Claimed content: '{result['title']}'")
+                        if view_button:
+                            st.info(f"This content is under takedown process")
+                    else:
+                        if st.button("Claim", key=df_data['Claim'][-1]):
+                            st.session_state.claimed[i] = True
+                            st.rerun()
+                    st.write("---")  # Separator between items
 
+            except requests.exceptions.RequestException as e:
+                st.error(f"Error fetching image for '{result['title']}': {e}")
+            except Exception as e:
+                st.error(f"Error displaying image for '{result['title']}': {e}")
+
+        df = pd.DataFrame(df_data)
+
+    else:
+        st.info("Enter a search query and click 'Scrape' to get results.")
+
+def analyze_deepfake(image, content_type):
+    """Placeholder function for deepfake analysis."""
+    if content_type == 'Image':
+        try:
+            # Placeholder: Replace with actual deepfake detection logic
+            confidences, _ = predict(image)
+            is_deepfake = 'Yes' if confidences['fake'] > 0.5 else 'No'
+            confidence = confidences['fake'] if is_deepfake == 'Yes' else confidences['real']
+            risk = 'High' if is_deepfake == 'Yes' else 'Low'
+            comment = 'Suspicious' if is_deepfake == 'Yes' else 'Normal'
+        except Exception:
+            is_deepfake = 'N/A'
+            confidence = 0.0
+            risk = 'N/A'
+            comment = 'N/A'
+    else:
+        is_deepfake = 'N/A'
+        confidence = 0.0
+        risk = 'N/A'
+        comment = 'N/A'
+    return is_deepfake, confidence, risk, comment
 
 
 def generate_report_ui():
