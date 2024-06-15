@@ -50,15 +50,6 @@ mock_df['count'] = 1
 # Time series data
 time_series_data = mock_df.groupby(['DATE', 'STATUS']).size().reset_index(name='count')
 
-# Prepare heatmap data for Nivo
-heatmap_data = pd.DataFrame(mock_data).groupby(['DATE', 'TYPE']).size().reset_index(name='count')
-heatmap_data_pivot = heatmap_data.pivot(index='TYPE', columns='DATE', values='count').fillna(0)
-
-# Convert pivot table to list of dictionaries
-heatmap_data_list = heatmap_data_pivot.reset_index().melt(id_vars='TYPE').pivot(index='TYPE', columns='DATE', values='value').reset_index()
-heatmap_data_list.columns.name = None  # Remove the index name
-heatmap_data_for_nivo = heatmap_data_list.to_dict('records')
-
 
 # Display the "Overview" tab
 def overview_tab():
@@ -144,15 +135,6 @@ def detailed_reports_tab():
     fig_bar = px.bar(mock_df, x='STATUS', title='Claim Status Distribution', color='STATUS')
     st.plotly_chart(fig_bar, use_container_width=True)
 
-    st.subheader("Heatmap of Detections Over Time")
-    heatmap_data = mock_df.groupby(['DATE', 'TYPE']).size().reset_index(name='count')
-    fig_heatmap = px.density_heatmap(heatmap_data, x='DATE', y='TYPE', z='count', title='Heatmap of Detections Over Time')
-    st.plotly_chart(fig_heatmap, use_container_width=True)
-
-    st.subheader("Correlation Analysis")
-    correlation_data = mock_df[['DATE', 'TYPE', 'STATUS', 'count']].copy()
-    fig_corr = px.scatter_matrix(correlation_data, dimensions=['DATE', 'TYPE', 'STATUS', 'count'], title='Correlation Analysis')
-    st.plotly_chart(fig_corr, use_container_width=True)
 
     st.subheader("Detailed Data Table")
     date_range = st.date_input("Select Date Range", [datetime(2024, 1, 1), datetime.now()])
