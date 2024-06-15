@@ -11,6 +11,8 @@ import plotly.express as px
 import plotly.express as px
 import plotly.graph_objs as go
 import streamlit.components.v1 as components
+from streamlit_echarts import st_echarts
+from streamlit_carousel import carousel
 
 # Generate mock data
 def generate_mock_data(start_date, end_date, num_entries):
@@ -45,11 +47,12 @@ pie_data_with_percentage = [
 # Prepare data for line chart
 mock_df = pd.DataFrame(mock_data)
 mock_df['DATE'] = pd.to_datetime(mock_df['DATE'])
-mock_df['count'] = 1
+mock_df['count'] = 17
 
 # Time series data
 time_series_data = mock_df.groupby(['DATE', 'STATUS']).size().reset_index(name='count')
 
+colors = ["#0A1F44", "#B0B0B0", "#5A8CCB"]
 
 # Display the "Overview" tab
 def overview_tab():
@@ -59,78 +62,145 @@ def overview_tab():
 
     with col1:
         st.metric("Total Detected Media", total_detected_media, "+16.1% from last month")
+        st.text("")
         st.metric("Total Content Submitted", "8351", "+19.1% from last month")
 
     with col2:
+        
         st.metric("Deepfakes Detected", "4231", "+15.2% from last month")
+        st.text("")
         st.metric("Total Claims Processed", "10083", "+14.6% from last month")
-
-    with col3:
-        st.metric("Detection Accuracy Rate", "99%", "+2% from last month")
-        st.metric("Average Time to Process Claims", "5 days", "-10% from last month")
-
-    st.subheader("Media Type Distribution")
-    with elements("nivo_pie_chart"):
-        with mui.Box(sx={"height": 300}):
-            nivo.Pie(
-                data=pie_data_with_percentage,
-                margin={"top": 10, "right": 10, "bottom": 30, "left": 10},
-                innerRadius=0.5,
-                padAngle=0.7,
-                cornerRadius=3,
-                activeOuterRadiusOffset=8,
-                colors={"scheme": "blues"},  # Change color scheme to blues
-                borderWidth=1,
-                borderColor={"from": "color", "modifiers": [["darker", 0.95]]},
-                arcLabelsSkipAngle=10,
-                arcLabelsTextColor={"from": "color", "modifiers": [["darker", 17]]},
-                arcLabelsRadiusOffset=0.7,  # Adjust label position
-                arcLabelsColor="black",  # Set label color to background
-                arcLabelsFormat=".8f%%",  # Format label as percentage
-                arcLinkLabelsSkipAngle=10,
-                arcLinkLabelsTextColor="grey",
-                arcLinkLabelsThickness=2,
-                arcLinkLabelsColor="black",
-                fill=[
-                    {"match": {"id": "Image"}, "id": "#0A1F44"},
-                    {"match": {"id": "Video"}, "id": "#B0B0B0"},
-                    {"match": {"id": "Audio"}, "id": "#5A8CCB"},
-                ],
-                legends=[
-                    {
-                        "anchor": "right",
-                        "direction": "column",
-                        "justify": False,
-                        "translateX": 55,
-                        "translateY": 36,
-                        "itemsSpacing": 4,
-                        "itemWidth": 100,
-                        "itemHeight": 18,
-                        "itemTextColor": "#999",
-                        "itemDirection": "left-to-right",
-                        "itemOpacity": 1,
-                        "symbolSize": 18,
-                        "symbolShape": "circle",
-                        "effects": [
-                            {"on": "hover", "style": {"itemTextColor": "#090"}}
-                        ],
-                    }
-                ],
-            )
     
-
+    with col3:
+        st.text("")  
+        st.metric("Average Time to Process Claims", "5 days", "-10% from last month")
+        
+    st.text("")  
+    col_pie, col_perc = st.columns([2, 1])
+    with col_pie:
+        st.subheader("Media Type Distribution")
+        with elements("nivo_pie_chart"):
+            with mui.Box(sx={"height": 300}):
+                nivo.Pie(
+                    data=pie_data_with_percentage,
+                    margin={"top": 10, "right": 10, "bottom": 30, "left": 10},
+                    innerRadius=0.5,
+                    padAngle=0.7,
+                    cornerRadius=3,
+                    activeOuterRadiusOffset=8,
+                    colors={"scheme": "blues"},  # Change color scheme to blues
+                    borderWidth=1,
+                    borderColor={"from": "color", "modifiers": [["darker", 0.95]]},
+                    arcLabelsSkipAngle=10,
+                    arcLabelsTextColor={"from": "color", "modifiers": [["darker", 17]]},
+                    arcLabelsRadiusOffset=0.7,  # Adjust label position
+                    arcLabelsColor="black",  # Set label color to background
+                    arcLabelsFormat=".8f%%",  # Format label as percentage
+                    arcLinkLabelsSkipAngle=10,
+                    arcLinkLabelsTextColor="grey",
+                    arcLinkLabelsThickness=2,
+                    arcLinkLabelsColor="black",
+                    fill=[
+                        {"match": {"id": "Image"}, "id": "#0A1F44"},
+                        {"match": {"id": "Video"}, "id": "#B0B0B0"},
+                        {"match": {"id": "Audio"}, "id": "#5A8CCB"},
+                    ],
+                    legends=[
+                        {
+                            "anchor": "right",
+                            "direction": "column",
+                            "justify": False,
+                            "translateX": 55,
+                            "translateY": 36,
+                            "itemsSpacing": 4,
+                            "itemWidth": 100,
+                            "itemHeight": 18,
+                            "itemTextColor": "#999",
+                            "itemDirection": "left-to-right",
+                            "itemOpacity": 1,
+                            "symbolSize": 18,
+                            "symbolShape": "circle",
+                            "effects": [
+                                {"on": "hover", "style": {"itemTextColor": "#090"}}
+                            ],
+                        }
+                    ],
+                )
+    
+    with col_perc:
+        st.subheader("Detection Accuracy Rate")
+        gauge_options = {
+            "tooltip": {
+                    "formatter": '{a} <br/>{b} : {c}%'
+                },
+            "series": [
+                {
+                    "name": "Accuracy",
+                    "type": "gauge",
+                    "startAngle": 180,
+                    "endAngle": 0,
+                    "progress": {"show": True, "roundCap": True, "width": 1},
+                    "axisLine": {"lineStyle": {"width": 7}},
+                    "itemStyle": {
+                            "color": '#0A1F44',
+                            "shadowColor": 'rgba(0,138,255,0.45)',
+                            "shadowBlur": 10,
+                            "shadowOffsetX": 2,
+                            "shadowOffsetY": 2,
+                            "radius": '55%',
+                        },
+                    "axisTick": {"show": True},
+                    "splitLine": {"length": 15, "lineStyle": {"width": 2, "color": "#999"}},
+                    "axisLabel": {"distance": 25, "color": "#999", "fontSize": 15},
+                    "anchor": {"show": True, "showAbove": True, "size": 9, "itemStyle": {"borderWidth": 7}},
+                    "title": {"show": True},
+                    "detail": {"valueAnimation": "true",
+                                "formatter": '{value}%',
+                                "width": '60%',
+                                "height": 20,
+                                "offsetCenter": [0, '30%'],
+                                "valueAnimation": "true"},
+                    "data": [{"value": 99}],
+                }
+            ]
+        }
+        st_echarts(options=gauge_options, height="400px")
       
 
 # Detailed Reports Tab
 def detailed_reports_tab():
 
     st.subheader("Claim Status Over Time")
-    fig_area = px.area(time_series_data, x='DATE', y='count', color='STATUS', title='Claim Status Over Time')
+    fig_area = px.area(time_series_data, x='DATE', y='count', color='STATUS')
     st.plotly_chart(fig_area, use_container_width=True)
 
     st.subheader("Claim Status Distribution")
-    fig_bar = px.bar(mock_df, x='STATUS', title='Claim Status Distribution', color='STATUS')
+    fig_bar = px.bar(mock_df, x='STATUS', color='STATUS')
     st.plotly_chart(fig_bar, use_container_width=True)
+
+    st.subheader("Most Leaked Contents")
+    test_items = [
+        dict(
+            title="taylor swift_1",
+            text="from LA concert",
+            img="https://www.billboard.com/wp-content/uploads/2023/08/taylor-swift-santa-clara-a-2023-billboard-espanol-1548.jpg",
+           
+        ),
+        dict(
+            title="",
+            text="",
+            img="https://static.eldiario.es/clip/068c589d-5afd-4201-84ac-7ae66372d3a8_16-9-discover-aspect-ratio_default_1090295.jpg",
+            
+        ),
+        dict(
+            title="",
+            text="From the ..",
+            img="https://www.usmagazine.com/wp-content/uploads/2024/06/feature-Taylor-Swift-Stops-Edinburgh-Eras-Tour-Show-Refuses-to-Continue-Until-Fans-Get-Help.jpg?w=1000&quality=86&strip=all",
+           
+        ),
+    ]
+
+    carousel(items=test_items, width=0.5)
 
 
     st.subheader("Detailed Data Table")
@@ -192,7 +262,7 @@ def detailed_reports_tab():
             <th>TYPE</th>
             <th>DATE</th>
             <th>STATUS</th>
-            <th>FREQUENCY</th>
+            <th>MATCHES</th>
         </tr>
     """
     for idx, row in filtered_df.iterrows():
