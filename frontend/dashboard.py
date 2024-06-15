@@ -117,19 +117,16 @@ def overview_tab():
                     }
                 ],
             )
-    st.subheader("Claim Status Over Time")
-    fig_area = px.area(time_series_data, x='DATE', y='count', color='STATUS', title='Claim Status Over Time')
-    st.plotly_chart(fig_area, use_container_width=True)
+    
 
-    
-    
+      
 
 # Detailed Reports Tab
 def detailed_reports_tab():
-    
+
     st.subheader("Claim Status Over Time")
-    fig_line = px.line(time_series_data, x='DATE', y='count', color='STATUS', title='Claim Status Over Time')
-    st.plotly_chart(fig_line, use_container_width=True)
+    fig_area = px.area(time_series_data, x='DATE', y='count', color='STATUS', title='Claim Status Over Time')
+    st.plotly_chart(fig_area, use_container_width=True)
 
     st.subheader("Claim Status Distribution")
     fig_bar = px.bar(mock_df, x='STATUS', title='Claim Status Distribution', color='STATUS')
