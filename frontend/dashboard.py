@@ -177,7 +177,7 @@ def detailed_reports_tab():
         border: none;
     }
     button_CLAIM {
-        background-color: #C12504;
+        background-color: #FF2B2B;
         color: white;
         padding: 5px 10px;
         text-align: center;
